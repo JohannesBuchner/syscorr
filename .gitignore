@@ -1,0 +1,6 @@
+*.pyc
+*~
+*.txt
+*out*
+*.pdf
+*.egg-info
