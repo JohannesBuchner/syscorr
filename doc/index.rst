@@ -31,11 +31,21 @@ Usage
 Follow the :doc:`example` for details.
 
 Requirements
--------------
+-------------------------------
 
 * pymultinest
 * matplotlib
 * (recommended) uncertainties
+
+Download and Installation
+-------------------------------
+
+The source is available at https://github.com/JohannesBuchner/syscorr
+You can run the example just like that, or install it with
+
+.. code-block:: bash
+
+	$ python setup.py install # (or locally only with --user)
 
 .. _data:
 
