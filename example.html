@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Example &mdash; syscorr - Bayesian correlation swiss army knife 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="syscorr - Bayesian correlation swiss army knife 0.1 documentation" href="index.html" />
+    <link rel="prev" title="SysCorr - Bayesian correlation swiss army knife" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="index.html" title="SysCorr - Bayesian correlation swiss army knife"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">syscorr - Bayesian correlation swiss army knife 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="example">
+<h1>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
+<p>SysCorr comes with a simple demonstration example in the example/ folder.
+We will go through the code.</p>
+<div class="section" id="data">
+<h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<p>First, gen.py generates example data for analysis:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>python gen.py
+</pre></div>
+</div>
+<p>For instance, it creates the sysline/ dataset, which contains 40 datapoints:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>ls sysline/chain
+chain00  chain04  chain08  chain12  chain16  chain20  chain24  chain28  chain32  chain36
+chain01  chain05  chain09  chain13  chain17  chain21  chain25  chain29  chain33  chain37
+chain02  chain06  chain10  chain14  chain18  chain22  chain26  chain30  chain34  chain38
+chain03  chain07  chain11  chain15  chain19  chain23  chain27  chain31  chain35  chain39
+</pre></div>
+</div>
+<p>You can look at each data point, which is made up of a chain of values to represent the uncertainty (like a markov chain):</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>gnuplot
+&gt; plot <span class="o">[</span>0:1<span class="o">]</span> <span class="o">[</span>-1:1<span class="o">]</span> <span class="s2">&quot;sysline/chain01&quot;</span>
+</pre></div>
+</div>
+<p>When you prepare your own data, make sure they are scaled so that they are in the units where you expect a relationship. I.e. if you are looking for a power law, take the logarithm of the values.
+If your x/y values lie outside the -20:20 range, you have to adapt the transform functions in the code (or scale the data).</p>
+</div>
+<div class="section" id="run">
+<h2>Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h2>
+<p>Launch the example application now:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ RESUME</span><span class="o">=</span>1 python analyse.py out/sysline_ sysline/chain??
+</pre></div>
+</div>
+<p>This will take some time, so lets find out what the analysis.py file does. You will write a similar file for your application:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">output_basename</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+<span class="n">resume</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;RESUME&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;1&#39;</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>The output will be written to &#8216;out/sysline_&#8217; (first argument)</li>
+<li>Files are the data files (second argument and onwards).</li>
+<li>If you set RESUME=1, then the analysis will continue. Otherwise, it will start from scratch.</li>
+</ol>
+</div>
+<div class="section" id="models">
+<h2>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h2>
+<p>Next, the models are defined:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">example_models</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+	<span class="c"># y is drawn independently of x, from a gaussian. 2 free parameters (stdev, mean)</span>
+	<span class="n">independent_normal</span> <span class="o">=</span> <span class="n">PolyModel</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rv_type</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">),</span>
+
+	<span class="c"># y is drawn independently of x, from a uniform dist. 2 free parameters (width, low)</span>
+	<span class="n">independent_uniform</span> <span class="o">=</span> <span class="n">PolyModel</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rv_type</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">uniform</span><span class="p">),</span>
+
+	<span class="c"># y is drawn as a function of x, with gaussian systematic scatter </span>
+	<span class="c"># y ~ N(b*x + a, s)      3 free parameters (s, a, b)</span>
+	<span class="n">line</span> <span class="o">=</span> <span class="n">PolyModel</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+
+	<span class="c"># y is drawn as a function of x, with gaussian systematic scatter </span>
+	<span class="c"># y ~ N(c*x**2 + b*x + a, s)      4 free parameters (s, a, b, c)</span>
+	<span class="n">square</span> <span class="o">=</span> <span class="n">PolyModel</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+	
+	<span class="c"># two gaussians before and after 0. 4 parameters (means and stdevs)</span>
+	<span class="n">tribinned</span> <span class="o">=</span> <span class="n">BinnedModel</span><span class="p">(</span><span class="n">bins</span> <span class="o">=</span> <span class="p">[(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)],</span> <span class="n">rv_type</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to compare a linear correlation to a non-correlation, you would
+have &#8216;independent_uniform&#8217; and &#8216;line&#8217;.</p>
+<p>The next code chunk just allows you to specify models from the command line without editing code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">modelnames</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;MODELS&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">modelnames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+	<span class="n">modelnames</span> <span class="o">=</span> <span class="n">example_models</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+<span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">modelnames</span><span class="p">:</span>
+	<span class="k">print</span> <span class="s">&#39;using model:&#39;</span><span class="p">,</span> <span class="n">m</span>
+	<span class="n">model</span> <span class="o">=</span> <span class="n">example_models</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+	<span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">model</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="calculation">
+<h2>Calculation<a class="headerlink" href="#calculation" title="Permalink to this headline">¶</a></h2>
+<p>All that is left is to load the data and send it off!</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="s">&#39;loading data...&#39;</span>
+<span class="n">chains</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+<span class="k">print</span> <span class="s">&#39;loading data done.&#39;</span>
+
+<span class="n">syscorr</span><span class="o">.</span><span class="n">calc_models</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span> 
+	<span class="n">chains</span><span class="o">=</span><span class="n">chains</span><span class="p">,</span> 
+	<span class="n">output_basename</span><span class="o">=</span><span class="n">output_basename</span><span class="p">,</span> 
+	<span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<p>As an example, the text output can look like this:</p>
+<div class="highlight-python"><pre>(...)
+Total Samples:                              8011
+Nested Sampling ln(Z):                -38.456223
+ ln(ev)=  -38.109756655272683      +/-  0.13633196813580595
+ Total Likelihood Evaluations:         8011
+ Sampling finished. Exiting MultiNest
+  analysing data from out/sysline_independent_normal.txt
+Analysing multinest output...
+  analysing data from out/sysline_independent_normal.txt
+posterior plot written to "out/sysline_independent_normalpost_model_data.pdf"
+
+calculation results: ========================================
+
+          model name | log Z
+ independent_uniform : -21.8
+  independent_normal : -16.6
+           tribinned : -11.3
+              square : -7.9
+                line : -6.7 &lt;- BEST MODEL
+
+Parameters for model "line":
+            syserror: 0.18+/-0.04
+                   a: 1.8+/-0.2
+                   b: 0.17+/-0.08</pre>
+</div>
+<p>This gives you the best model (line), and the parameters of that line. (Input was y=2*x + 0.1 with error 0.1)</p>
+<div class="figure">
+<img alt="posterior prediction for line model" src="_images/line.png" />
+<p class="caption">The model with several permitted parameters overplotted over the data.
+For each model prediction, red is the median line, while grey shows the 10%/90% quantiles.
+The data points are shown in blue using the x/y median and the permitted x/y extrema for the rectangles.</p>
+</div>
+<div class="figure">
+<img alt="posterior prediction for independent_uniform model" src="_images/independent.png" />
+<p class="caption">Same as above, but for the model with independent uniform distribution for y,
+i.e. y is uncorrelated of x. This model is ruled out by the model selection (see text output above).</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example</a><ul>
+<li><a class="reference internal" href="#data">Data</a></li>
+<li><a class="reference internal" href="#run">Run</a></li>
+<li><a class="reference internal" href="#models">Models</a></li>
+<li><a class="reference internal" href="#calculation">Calculation</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">SysCorr - Bayesian correlation swiss army knife</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/example.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="index.html" title="SysCorr - Bayesian correlation swiss army knife"
+             >previous</a> |</li>
+        <li><a href="index.html">syscorr - Bayesian correlation swiss army knife 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Johannes Buchner.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

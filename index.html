@@ -1,0 +1,216 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SysCorr - Bayesian correlation swiss army knife &mdash; syscorr - Bayesian correlation swiss army knife 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="syscorr - Bayesian correlation swiss army knife 0.1 documentation" href="#" />
+    <link rel="next" title="Example" href="example.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="example.html" title="Example"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">syscorr - Bayesian correlation swiss army knife 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="syscorr-bayesian-correlation-swiss-army-knife">
+<h1>SysCorr - Bayesian correlation swiss army knife<a class="headerlink" href="#syscorr-bayesian-correlation-swiss-army-knife" title="Permalink to this headline">¶</a></h1>
+<p>Tests correlations between datapoints with uncertainties.</p>
+<div class="section" id="what-can-it-do">
+<h2>What can it do?<a class="headerlink" href="#what-can-it-do" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Testing if correlation exists (vs independence)</li>
+<li>Estimating parameters of the dependence (line + systematic error, or higher-order polynomial, ...)</li>
+<li>Plot the resulting correlation with its uncertainty</li>
+<li>Hierarchical Bayesian analysis (with intermediate prior)</li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Provide the individual data points (<a class="reference internal" href="#data"><em>see below</em></a>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Choose all the models you would like to run</dt>
+<dd><ul class="first last simple">
+<li>Uncorrelated uniform distributions</li>
+<li>Uncorrelated gaussian distributions</li>
+<li>Line with systematic error</li>
+<li>Square law with systematic error</li>
+<li>etc.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Run. This will automatically</dt>
+<dd><ul class="first last simple">
+<li>estimate parameters for the chosen models</li>
+<li>compute the evidence for the chosen models</li>
+<li>plot the model posterior predictions with uncertainties</li>
+<li>select the best model</li>
+<li>print the parameters with uncertainties</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">(optional) Plot marginal distributions using pymultinests &#8216;multinest_marginals.py&#8217;</p>
+</li>
+</ul>
+<p>Follow the <a class="reference internal" href="example.html"><em>Example</em></a> for details.</p>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>pymultinest</li>
+<li>jbopt</li>
+<li>uncertainties</li>
+<li>numpy/scipy</li>
+<li>matplotlib</li>
+</ul>
+</div>
+<div class="section" id="data-input-format">
+<span id="data"></span><h2>Data Input format<a class="headerlink" href="#data-input-format" title="Permalink to this headline">¶</a></h2>
+<p>For maximum flexibility, the data points have to be provided as Markov Chains (points of equal weight),
+with one chain file per data point.
+The first and second column specify the x and y data.</p>
+<p>For example, creating a chain for a datapoint at (2, 3) with normal errors 0.1 in both dimensions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">chain</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+<span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s">&#39;datapoint01.txt&#39;</span><span class="p">,</span> <span class="n">chain</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This allows</p>
+<ul class="simple">
+<li>specifying correlated errors</li>
+<li>handing over analysis results from Monte Carlo analyses (e.g. MCMC, MultiNest) output.</li>
+<li>Hierarchical Bayesian analysis with an intermediate prior</li>
+</ul>
+<p>The application (see the example) is then called like so:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>python analyse.py out/ datapoint01.txt datapoint02.txt ...
+</pre></div>
+</div>
+<hr class="docutils" />
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="example.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#run">Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#calculation">Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html#output">Output</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SysCorr - Bayesian correlation swiss army knife</a><ul>
+<li><a class="reference internal" href="#what-can-it-do">What can it do?</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#data-input-format">Data Input format</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="example.html"
+                        title="next chapter">Example</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="example.html" title="Example"
+             >next</a> |</li>
+        <li><a href="#">syscorr - Bayesian correlation swiss army knife 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Johannes Buchner.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
