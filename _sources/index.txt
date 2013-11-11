@@ -34,10 +34,8 @@ Requirements
 -------------
 
 * pymultinest
-* jbopt
-* uncertainties
-* numpy/scipy
 * matplotlib
+* (recommended) uncertainties
 
 .. _data:
 
