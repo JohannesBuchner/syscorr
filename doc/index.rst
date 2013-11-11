@@ -61,7 +61,7 @@ This allows
 
 * specifying correlated errors
 * handing over analysis results from Monte Carlo analyses (e.g. MCMC, MultiNest) output.
-* Hierarchical Bayesian analysis with an intermediate prior
+* Hierarchical Bayesian analysis with an intermediate prior (a third column containing weights is read when available).
 
 The application (see the example) is then called like so:
 

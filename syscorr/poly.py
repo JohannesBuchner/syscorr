@@ -42,8 +42,9 @@ class PolyModel(object):
 			for k, c in self.chains:
 				x = c[:,0]
 				y = c[:,1]
+				w = c[:,2] if c.shape[1] > 2 else 1
 				rv = model(x)
-				prob = rv.pdf(y).mean()
+				prob = (rv.pdf(y) * w).mean()
 				if prob == 0:
 					print 'parameters %s ruled out by object %s' % (str(v), k)
 					return -1e100

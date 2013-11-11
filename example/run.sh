@@ -2,6 +2,7 @@
 
 python gen.py
 
+mkdir -p out
 # these take quite a bit of time.
 
 RESUME=1 python analyse.py out/sysline_ sysline/chain?? &
