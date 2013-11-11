@@ -1,8 +1,43 @@
-from jbopt.mn import multinest
 import pymultinest
 import matplotlib.pyplot as plt, matplotlib.patches as patches
 import numpy
 import scipy, scipy.stats
+from numpy import log, exp
+
+def multinest(parameter_names, transform, loglikelihood, output_basename, **problem):
+	parameters = parameter_names
+	n_params = len(parameters)
+	
+	def myprior(cube, ndim, nparams):
+		params = transform([cube[i] for i in range(ndim)])
+		for i in range(ndim):
+			cube[i] = params[i]
+	
+	def myloglike(cube, ndim, nparams):
+		l = loglikelihood([cube[i] for i in range(ndim)])
+		return l
+	
+	# run MultiNest
+	mn_args = dict(
+		outputfiles_basename = output_basename,
+		resume = problem.get('resume', False), 
+		verbose = True,
+		n_live_points = problem.get('n_live_points', 400))
+	if 'seed' in problem:
+		mn_args['seed'] = problem['seed']
+	pymultinest.run(myloglike, myprior, n_params, **mn_args)
+
+	import json
+	# store name of parameters, always useful
+	with file('%sparams.json' % output_basename, 'w') as f:
+		json.dump(parameters, f, indent=2)
+	# analyse
+	a = pymultinest.Analyzer(n_params = n_params, 
+		outputfiles_basename = output_basename)
+	s = a.get_stats()
+	with open('%sstats.json' % a.outputfiles_basename, mode='w') as f:
+		json.dump(s, f, indent=2)
+	return a
 
 def calc_model(output_basename, chains, model, modelname, **args):
 	model.chains = chains
@@ -19,15 +54,13 @@ def calc_model(output_basename, chains, model, modelname, **args):
 			maxs[i] = max(maxs[i], newmax)
 	print 'running multinest on model "%s" (saving to "%s")' % (modelname, output_basename)
 	
-	ret = multinest(
+	a = multinest(
 		parameter_names=model.parameter_names,
 		transform=model.transform,
 		loglikelihood=model.loglikelihood,
 		output_basename=output_basename, **args)
 	
 	print 'Analysing multinest output...'
-	a = pymultinest.Analyzer(outputfiles_basename=output_basename, n_params=len(model.parameter_names))
-	
 	logZ = a.get_stats()['global evidence'] / numpy.log(10)
 	
 	plt.figure(figsize=(7,7))
@@ -55,7 +88,7 @@ def calc_model(output_basename, chains, model, modelname, **args):
 	plt.close()
 	print 'posterior plot written to "%spost_model_data.pdf"' % output_basename
 	#a.get_equal_weight_points
-	return dict(run=ret, logZ=logZ, stats=a.get_stats())
+	return dict(logZ=logZ, stats=a.get_stats())
 
 
 def calc_models(models, chains, output_basename, **problem):

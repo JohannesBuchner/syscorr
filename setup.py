@@ -22,7 +22,7 @@ setup(
     license = "AGPLv3",
     packages = ["syscorr"],
     provides = ["syscorr"],
-    requires = ["numpy (>=1.5)", "matplotlib", "scipy", "uncertainties", "jbopt", "pymultinest"],
+    requires = ["numpy (>=1.5)", "matplotlib", "scipy", "pymultinest"],
     long_description=long_description,
 )
 
